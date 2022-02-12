@@ -42,13 +42,21 @@ if not fdf.startswith(b'%FDF-1.2'):
     sys.exit()
 
 # Where the magic happened
-pattern = re.compile(rb'<</T\(([^\)]*)\)(/V\(?([^\)>]*)\)?>>)?')
+pattern = re.compile(rb'<</T\(([^\)]*)\)(/V[\(/]([^\)>]+)\)?>>)?')
 fdf_list = re.findall(pattern, fdf)
 
 
+def oct(mat):
+    return int(b'0o' + mat.group(1), base=8).to_bytes(1, 'big')
+
+
 def utf(bs):
-    return bs.decode('utf_16') if bs.startswith(BOM_UTF16_BE) \
-        else bs.decode('ascii')
+    if bs.startswith(BOM_UTF16_BE):
+        return bs.decode('utf_16')
+    elif re.search(rb'\\[0-3][0-7][0-7]', bs):
+        return utf(re.sub(rb'\\([0-3][0-7][0-7])', oct, bs))
+    else:
+        return bs.decode('ascii')
 
 
 csv_names = []
