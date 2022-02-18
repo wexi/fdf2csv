@@ -19,8 +19,14 @@ from codecs import BOM_UTF16_BE
 
 # check if there are a argument
 arglen = len(sys.argv)
-if not arglen == 2:
-    print("Usage: fdf2csv.py file[.fdf]")
+if not 2 <= arglen <= 3:
+    print("Usage: fdf2csv.py file[.fdf] [codec]")
+    sys.exit()
+codec = 'latin1' if arglen < 3 else sys.argv[2]
+try:
+    b'1234'.decode(codec)
+except LookupError as e:
+    print("Error: " + e.args[-1])
     sys.exit()
 
 # check if the file exist
@@ -57,7 +63,7 @@ def utf(bs):
         elif re.search(rb'\\[0-3][0-7][0-7]', bs):
             return utf(re.sub(rb'\\([0-3][0-7][0-7])', oct, bs))
         else:
-            return bs.decode('latin1')
+            return bs.decode(codec)
     except UnicodeDecodeError:
         return '???'
 
