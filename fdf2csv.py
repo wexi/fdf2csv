@@ -17,17 +17,16 @@ import sys
 from codecs import BOM_UTF16_BE
 
 
-# check if there are a argument
 arglen = len(sys.argv)
 if not 2 <= arglen <= 3:
     print("Usage: fdf2csv.py file[.fdf] [codec]")
-    sys.exit()
+    sys.exit(1)
 codec = 'latin1' if arglen < 3 else sys.argv[2]
 try:
     b'1234'.decode(codec)
 except LookupError as e:
     print("Error: " + e.args[-1])
-    sys.exit()
+    sys.exit(1)
 
 # check if the file exist
 fname = os.path.expanduser(sys.argv[1])
@@ -37,7 +36,7 @@ elif not fname.endswith('.fdf'):
     fname += '.fdf'
 if not os.path.isfile(fname):
     print("Error: " + fname + " doesn't exist")
-    sys.exit()
+    sys.exit(1)
 
 # open file
 with open(fname, 'rb') as f:
@@ -45,7 +44,7 @@ with open(fname, 'rb') as f:
 
 if not fdf.startswith(b'%FDF-1.2'):
     print("Error: Missing FDF signature")
-    sys.exit()
+    sys.exit(1)
 
 # Where the magic happened
 pattern = re.compile(rb'<</T\(([^\)]*)\)(/V[\(/]([^\)>]+)\)?>>)?')
@@ -92,7 +91,7 @@ if mode == 'rt':
         names = list(row.keys())  # no need to sort
         if names != csv_names:
             print("Error: Fields mismatch")
-            sys.exit()
+            sys.exit(1)
         mode = 'at'
 
 with open(csv_fname, mode) as f:
@@ -100,3 +99,4 @@ with open(csv_fname, mode) as f:
     if mode == 'xt':
         wr.writerow(csv_names)
     wr.writerow(csv_values)
+sys.exit(0)
