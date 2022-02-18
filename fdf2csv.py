@@ -51,12 +51,15 @@ def oct(mat):
 
 
 def utf(bs):
-    if bs.startswith(BOM_UTF16_BE):
-        return bs.decode('utf_16')
-    elif re.search(rb'\\[0-3][0-7][0-7]', bs):
-        return utf(re.sub(rb'\\([0-3][0-7][0-7])', oct, bs))
-    else:
-        return bs.decode('ascii')
+    try:
+        if bs.startswith(BOM_UTF16_BE):
+            return bs.decode('utf_16')
+        elif re.search(rb'\\[0-3][0-7][0-7]', bs):
+            return utf(re.sub(rb'\\([0-3][0-7][0-7])', oct, bs))
+        else:
+            return bs.decode('latin1')
+    except UnicodeDecodeError:
+        return '???'
 
 
 csv_names = []
