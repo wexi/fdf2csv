@@ -46,13 +46,20 @@ if not fdf.startswith(b'%FDF-1.2'):
     print("Error: Missing FDF signature")
     sys.exit(1)
 
-# Where the magic happened
-pattern = re.compile(rb'<</T\(([^\)]*)\)(/V[\(/]([^\)>]+)\)?>>)?')
-fdf_list = re.findall(pattern, fdf)
+# where magic happens
+pattern = re.compile(rb'<</T\(([^\)]*)\)(/V([^>]*))?>>')
+finds = re.findall(pattern, fdf)
+fdf_list = [(find[0],
+             find[2][1:] if find[2].startswith(b'/') else find[2][1:-1]
+             if find[1] else b'') for find in finds]
 
 
 def oct(mat):
     return int(b'0o' + mat.group(1), base=8).to_bytes(1, 'big')
+
+
+def esc(mat):
+    return mat.group(1)
 
 
 def utf(bs):
@@ -61,6 +68,8 @@ def utf(bs):
             return bs.decode('utf_16')
         elif re.search(rb'\\[0-3][0-7][0-7]', bs):
             return utf(re.sub(rb'\\([0-3][0-7][0-7])', oct, bs))
+        elif re.search(rb'\\[\(\)]', bs):
+            return utf(re.sub(rb'\\([\(\)])', esc, bs))
         else:
             return bs.decode(codec)
     except UnicodeDecodeError:
@@ -74,7 +83,7 @@ for token in fdf_list:
     if key not in ('Submit', 'Reset'):
         loc = bisect.bisect(csv_names, key)
         csv_names.insert(loc, key)
-        value = utf(token[2])
+        value = utf(token[1])
         csv_values.insert(loc, value)
 
 # Set the output filename based on input file
