@@ -9,13 +9,12 @@
 #testing         :Acrobat Reader FDF's only
 """
 
-import bisect
 import csv
 import os
 import re
 import sys
 from codecs import BOM_UTF16_BE
-
+from collections import OrderedDict
 
 arglen = len(sys.argv)
 if not 2 <= arglen <= 3:
@@ -76,15 +75,11 @@ def utf(bs):
         return '???'
 
 
-csv_names = []
-csv_values = []
+csv_table = OrderedDict()
 for token in fdf_list:
     key = utf(token[0])
     if key not in ('Submit', 'Reset'):
-        loc = bisect.bisect(csv_names, key)
-        csv_names.insert(loc, key)
-        value = utf(token[1])
-        csv_values.insert(loc, value)
+        csv_table[key] = utf(token[1])
 
 # Set the output filename based on input file
 csv_fname = re.sub(r'\d*\.fdf$', '.csv', fname)
@@ -95,17 +90,22 @@ print('Creating' if mode == 'xt' else 'Adding to',
 
 if mode == 'rt':
     with open(csv_fname, mode) as f:
-        rd = csv.DictReader(f)
-        row = next(rd)
-        names = list(row.keys())  # no need to sort
-        if names != csv_names:
-            print("Error: Fields mismatch")
+        rd = csv.reader(f)
+        keys = next(rd)
+        table = OrderedDict()
+        for key in keys:
+            table[key] = ''
+        table.update(csv_table)
+        if len(keys) < len(table):
+            print("Error: Mismatch with Header")
             sys.exit(1)
         mode = 'at'
 
 with open(csv_fname, mode) as f:
     wr = csv.writer(f)
     if mode == 'xt':
-        wr.writerow(csv_names)
-    wr.writerow(csv_values)
+        wr.writerow(csv_table.keys())
+        wr.writerow(csv_table.values())
+    else:
+        wr.writerow(table.values())
 sys.exit(0)
