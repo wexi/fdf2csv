@@ -7,6 +7,9 @@
 
 #hacker          :wexi
 #testing         :Acrobat Reader FDF's only
+
+#Note            :First FDF file in a sequence should have all fields present
+                 :Rich text in the FDF is not discoverable
 """
 
 import csv
@@ -92,12 +95,10 @@ if mode == 'rt':
     with open(csv_fname, mode) as f:
         rd = csv.reader(f)
         keys = next(rd)
-        table = OrderedDict()
-        for key in keys:
-            table[key] = ''
+        table = OrderedDict(zip(keys, ('',)*len(keys)))
         table.update(csv_table)
         if len(keys) < len(table):
-            print("Error: Mismatch with Header")
+            print("Error: Mismatch with CSV header")
             sys.exit(1)
         mode = 'at'
 
