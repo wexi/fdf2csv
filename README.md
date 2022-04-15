@@ -3,7 +3,7 @@
 # Thanks
 
 To [trockenasche](https://github.com/trockenasche/fdf2csv) for starting this project. It seems that the original
-author todo-s have been fully implemented.
+author todo-s have been fully implemented, and perhaps some more.
 
 
 # General
@@ -20,6 +20,9 @@ fdf2csv.py filename[#\*.fdf]
 
 Adds row/data to the outaput filename.csv if it exists. It is assumed that
 the FDF fields are unique; They would become the CSV column names.
+
+A \_serno field is introduced if the input filename has a trailing serial
+number.
 
 The input filename can include the file path (with a leading tilde for
 home page). The output CSV has the trailing digits removed.

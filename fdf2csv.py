@@ -78,14 +78,19 @@ def utf(bs):
         return '???'
 
 
+# Set the output filename based on input file
+csv_fname = re.sub(r'\d*\.fdf$', '.csv', fname)
+
 csv_table = OrderedDict()
+
+se = re.search(r'(\d+)\.fdf$', fname)
+if se and se.group(1):
+    csv_table['_serno'] = int(se.group(1))
+
 for token in fdf_list:
     key = utf(token[0])
     if key not in ('Submit', 'Reset'):
         csv_table[key] = utf(token[1])
-
-# Set the output filename based on input file
-csv_fname = re.sub(r'\d*\.fdf$', '.csv', fname)
 
 mode = 'rt' if os.path.isfile(csv_fname) else 'xt'
 print('Creating' if mode == 'xt' else 'Adding to',
