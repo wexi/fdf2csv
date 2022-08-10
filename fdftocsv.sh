@@ -1,5 +1,7 @@
 #!/bin/bash
 
-for BLOB in $HOME/Desktop/blobs/blob*.fdf; do
-    fdf2csv $BLOB
+BANK=$1
+
+for BLOB in blob${BANK:=0}*.fdf; do
+    fdf2csv ${BLOB} || break
 done

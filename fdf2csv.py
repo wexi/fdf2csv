@@ -92,26 +92,27 @@ for token in fdf_list:
     if key not in ('Submit', 'Reset'):
         csv_table[key] = utf(token[1])
 
+xlsx = os.path.basename(csv_fname)
 mode = 'rt' if os.path.isfile(csv_fname) else 'xt'
-print('Creating' if mode == 'xt' else 'Adding to',
-      os.path.basename(csv_fname))
 
 if mode == 'rt':
     with open(csv_fname, mode) as f:
+        mode = 'at'
         rd = csv.reader(f)
         keys = next(rd)
         table = OrderedDict(zip(keys, ('',)*len(keys)))
         table.update(csv_table)
         if len(keys) < len(table):
-            print("Error: Mismatch with CSV header")
+            print(fname, 'mismatch with', xlsx)
             sys.exit(1)
-        mode = 'at'
 
 with open(csv_fname, mode) as f:
     wr = csv.writer(f)
     if mode == 'xt':
         wr.writerow(csv_table.keys())
         wr.writerow(csv_table.values())
+        print(fname, 'create and add to', xlsx)
     else:
         wr.writerow(table.values())
+        print(fname, 'add to', xlsx)
 sys.exit(0)
