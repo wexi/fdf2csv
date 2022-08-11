@@ -19,33 +19,39 @@ import sys
 from codecs import BOM_UTF16_BE
 from collections import OrderedDict
 
-arglen = len(sys.argv)
-if not 2 <= arglen <= 3:
-    print("Usage: fdf2csv.py file[.fdf] [codec]")
+arg = sys.argv[1:]
+dry = arg and arg[0] == '-dry'
+if dry:
+    arg.pop(0)
+
+if not arg:
+    print("Usage: fdf2csv.py [-dry] file[.fdf] [codec]")
     sys.exit(1)
-codec = 'latin1' if arglen < 3 else sys.argv[2]
+
+
+codec = 'latin1' if not arg[1:] else arg[1]
 try:
     b'1234'.decode(codec)
 except LookupError as e:
-    print("Error: " + e.args[-1])
+    print(e)
     sys.exit(1)
 
 # check if the file exist
-fname = os.path.expanduser(sys.argv[1])
+fname = os.path.expanduser(arg[0])
 if fname.endswith('.'):
     fname += 'fdf'
 elif not fname.endswith('.fdf'):
     fname += '.fdf'
-if not os.path.isfile(fname):
-    print("Error: " + fname + " doesn't exist")
+
+try:
+    with open(fname, 'rb') as f:
+        fdf = f.read()
+except FileNotFoundError as e:
+    print(e)
     sys.exit(1)
 
-# open file
-with open(fname, 'rb') as f:
-    fdf = f.read()
-
 if not fdf.startswith(b'%FDF-1.2'):
-    print("Error: Missing FDF signature")
+    print('Missing FDF signature')
     sys.exit(1)
 
 # where magic happens
@@ -78,9 +84,6 @@ def utf(bs):
         return '???'
 
 
-# Set the output filename based on input file
-csv_fname = re.sub(r'\d*\.fdf$', '.csv', fname)
-
 csv_table = OrderedDict()
 
 se = re.search(r'(\d+)\.fdf$', fname)
@@ -92,27 +95,32 @@ for token in fdf_list:
     if key not in ('Submit', 'Reset'):
         csv_table[key] = utf(token[1])
 
-xlsx = os.path.basename(csv_fname)
-mode = 'rt' if os.path.isfile(csv_fname) else 'xt'
+if dry:
+    print(fname, '#fields:', len(csv_table))
+    sys.exit(0)
+
+csv_path = re.sub(r'\d*\.fdf$', '.csv', fname)
+csv_file = os.path.basename(csv_path)
+mode = 'rt' if os.path.isfile(csv_path) else 'xt'
 
 if mode == 'rt':
-    with open(csv_fname, mode) as f:
+    with open(csv_path, mode) as f:
         mode = 'at'
         rd = csv.reader(f)
         keys = next(rd)
         table = OrderedDict(zip(keys, ('',)*len(keys)))
         table.update(csv_table)
         if len(keys) < len(table):
-            print(fname, 'mismatch with', xlsx)
+            print(fname, 'mismatch with', csv_file)
             sys.exit(1)
 
-with open(csv_fname, mode) as f:
+with open(csv_path, mode) as f:
     wr = csv.writer(f)
     if mode == 'xt':
         wr.writerow(csv_table.keys())
         wr.writerow(csv_table.values())
-        print(fname, 'create and add to', xlsx)
+        print(fname, 'create and add to', csv_file)
     else:
         wr.writerow(table.values())
-        print(fname, 'add to', xlsx)
+        print(fname, 'add to', csv_file)
 sys.exit(0)
