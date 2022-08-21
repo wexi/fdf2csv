@@ -24,8 +24,12 @@ dry = arg and arg[0] == '-dry'
 if dry:
     arg.pop(0)
 
+empty = arg and arg[0] == '-empty'
+if empty:
+    arg.pop(0)
+
 if not arg:
-    print("Usage: fdf2csv.py [-dry] file[.fdf] [codec]")
+    print("Usage: fdf2csv.py [-dry] [-empty] file[.fdf] [codec]")
     sys.exit(1)
 
 
@@ -101,11 +105,10 @@ if dry:
 
 csv_path = re.sub(r'\d*\.fdf$', '.csv', fname)
 csv_file = os.path.basename(csv_path)
-mode = 'rt' if os.path.isfile(csv_path) else 'xt'
+mode = 'xt' if not os.path.isfile(csv_path) else ('wt' if empty else 'at')
 
-if mode == 'rt':
-    with open(csv_path, mode) as f:
-        mode = 'at'
+if mode != 'xt':
+    with open(csv_path, 'rt') as f:
         rd = csv.reader(f)
         keys = next(rd)
         table = OrderedDict(zip(keys, ('',)*len(keys)))
@@ -114,13 +117,14 @@ if mode == 'rt':
             print(fname, 'mismatch with', csv_file)
             sys.exit(1)
 
+
 with open(csv_path, mode) as f:
     wr = csv.writer(f)
-    if mode == 'xt':
+    if mode == 'at':
+        wr.writerow(table.values())
+        print(fname, 'add to', csv_file)
+    else:
         wr.writerow(csv_table.keys())
         wr.writerow(csv_table.values())
         print(fname, 'create and add to', csv_file)
-    else:
-        wr.writerow(table.values())
-        print(fname, 'add to', csv_file)
 sys.exit(0)

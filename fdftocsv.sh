@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while getopts b:d FLAG
+while getopts b:de FLAG
 do
     case ${FLAG} in
 	b)
@@ -9,8 +9,11 @@ do
 	d)
 	    DRY=-dry
 	    ;;
+	e)
+	    EMPTY=-empty
+	    ;;
 	*)
-	    echo "fdftocsv [-b<bank#>] [-d] #-d for dry run"
+	    echo "fdftocsv [-b<bank#>] [-d] [-e] #-d for dry run, -e to empty existing csv"
 	    exit
 	    ;;
     esac
