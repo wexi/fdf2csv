@@ -20,5 +20,5 @@ do
 done
 
 for BLOB in blob${BANK:=0}*.fdf; do
-    fdf2csv ${DRY} ${BLOB} || break
+    fdf2csv ${DRY} ${EMPTY} ${BLOB} || break
 done

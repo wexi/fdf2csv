@@ -111,12 +111,12 @@ if mode != 'xt':
     with open(csv_path, 'rt') as f:
         rd = csv.reader(f)
         keys = next(rd)
+        odds = set(csv_table.keys()) - set(keys)
+        if odds:
+            print(fname, 'unexpected field names:', odds)
+            sys.exit(1)
         table = OrderedDict(zip(keys, ('',)*len(keys)))
         table.update(csv_table)
-        if len(keys) < len(table):
-            print(fname, 'mismatch with', csv_file)
-            sys.exit(1)
-
 
 with open(csv_path, mode) as f:
     wr = csv.writer(f)
