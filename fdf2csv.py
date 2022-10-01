@@ -21,15 +21,19 @@ from collections import OrderedDict
 
 arg = sys.argv[1:]
 dry = arg and arg[0] == '-dry'
-if dry:
+if dry:                         # only display number of columns
+    arg.pop(0)
+
+skip = arg and arg[0] == '-skip'
+if skip:                        # ignore unknown columns
     arg.pop(0)
 
 empty = arg and arg[0] == '-empty'
-if empty:
+if empty:                       # rewrite csv file
     arg.pop(0)
-
+    
 if not arg:
-    print("Usage: fdf2csv.py [-dry] [-empty] file[.fdf] [codec]")
+    print("Usage: fdf2csv.py [-dry] [-skip] [-empty] file[.fdf] [codec]")
     sys.exit(1)
 
 
@@ -113,8 +117,11 @@ if mode != 'xt':
         keys = next(rd)
         odds = set(csv_table.keys()) - set(keys)
         if odds:
-            print(fname, 'unexpected field names:', odds)
-            sys.exit(1)
+            print(fname, 'Unexpected field name(s):', odds)
+            if not skip:
+                sys.exit(1)
+            for odd in odds:
+                csv_table.pop(odd)
         table = OrderedDict(zip(keys, ('',)*len(keys)))
         table.update(csv_table)
 

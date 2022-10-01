@@ -16,7 +16,7 @@ build a large single CSV.
 
 # Usage
 
-./fdf2csv.py [-dry] filename[#.fdf] [codec]
+./fdf2csv.py [-dry] [-skip] [-empty] filename[#.fdf] [codec]
 
 Adds row/data to the output filename.csv if it exists. It is assumed
 that the FDF fields are unique; They would become the CSV column
@@ -27,8 +27,6 @@ number.
 
 The input filename can include the file path (with a leading tilde for
 home page). The output CSV has the trailing digits removed.
-
-In a dry run the number of CSV fields is only counted and printed.
 
 ./fdftocsv.sh is a shell script that handles multiple FDF blobs.
 
