@@ -8,7 +8,7 @@
 #hacker          :wexi
 #testing         :Acrobat Reader FDF's only
 
-#Note            :First FDF file in a sequence should have all fields present
+#Note            :First FDF file in a sequence sets the order of coloumns
                  :Rich text in the FDF is not discoverable
 """
 
@@ -31,8 +31,8 @@ if skip:                        # ignore unknown columns
 empty = arg and arg[0] == '-empty'
 if empty:                       # rewrite csv file
     arg.pop(0)
-    
-if not arg:
+
+if not arg or arg[0].startswith('-'):
     print("Usage: fdf2csv.py [-dry] [-skip] [-empty] file[.fdf] [codec]")
     sys.exit(1)
 
@@ -117,8 +117,8 @@ if mode != 'xt':
         keys = next(rd)
         odds = set(csv_table.keys()) - set(keys)
         if odds:
-            print(fname, 'Unexpected field name(s):', odds)
             if not skip:
+                print(fname, 'Unexpected column name(s):', odds)
                 sys.exit(1)
             for odd in odds:
                 csv_table.pop(odd)

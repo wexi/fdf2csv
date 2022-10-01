@@ -28,5 +28,5 @@ number.
 The input filename can include the file path (with a leading tilde for
 home page). The output CSV has the trailing digits removed.
 
-./fdftocsv.sh is a shell script that handles multiple FDF blobs.
+./fdftocsv.sh is a shell script that handles multiple FDF "blobs".
 

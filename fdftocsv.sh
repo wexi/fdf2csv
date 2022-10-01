@@ -16,7 +16,7 @@ do
 	    EMPTY=-empty
 	    ;;
 	*)
-	    echo "fdftocsv [-b<bank#>] [-d] [-s] [-e] # -d dry run, -s ignore unexpected fields, -e empty existing csv"
+	    echo "fdftocsv [-b<bank#>] [-d] [-s] [-e] # -d dry run, -s ignore unexpected columns, -e empty existing csv"
 	    exit
 	    ;;
     esac
