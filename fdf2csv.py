@@ -131,7 +131,11 @@ with open(csv_path, mode) as f:
         wr.writerow(table.values())
         print(fname, 'add to', csv_file)
     else:
-        wr.writerow(csv_table.keys())
-        wr.writerow(csv_table.values())
-        print(fname, 'create and add to', csv_file)
+        if mode == 'xt':
+            wr.writerow(csv_table.keys())
+            wr.writerow(csv_table.values())
+        else:
+            wr.writerow(table.keys())
+            wr.writerow(table.values())
+        print(fname, 'create, add to', csv_file)
 sys.exit(0)
