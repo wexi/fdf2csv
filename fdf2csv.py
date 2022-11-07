@@ -81,7 +81,7 @@ def esc(mat):
 def utf(bs):
     try:
         if bs.startswith(BOM_UTF16_BE):
-            return bs.decode('utf_16')
+            return bs.decode('utf-16')
         elif re.search(rb'\\[0-3][0-7][0-7]', bs):
             return utf(re.sub(rb'\\([0-3][0-7][0-7])', oct, bs))
         elif re.search(rb'\\[\(\)]', bs):
