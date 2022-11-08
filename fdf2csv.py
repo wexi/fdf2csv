@@ -100,7 +100,7 @@ if se and se.group(1):
 
 for token in fdf_list:
     key = utf(token[0])
-    if key not in ('Submit', 'Reset'):
+    if key.lower() not in ('submit', 'reset'):
         csv_table[key] = utf(token[1])
 
 if dry:
