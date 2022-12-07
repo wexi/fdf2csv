@@ -36,28 +36,26 @@ if not arg or arg[0].startswith('-'):
     print("Usage: fdf2csv.py [-dry] [-skip] [-empty] file[.fdf] [codec]")
     sys.exit(1)
 
-# check if the file exist
 fname = os.path.expanduser(arg[0])
 if fname.endswith('.'):
     fname += 'fdf'
-elif not fname.endswith('.fdf'):
-    fname += '.fdf'
 
 try:
     with open(fname, 'rb') as f:
         fdf = f.read()
+        assert fdf.startswith(b'%FDF-1.2')
+        arg.pop(0)
+        se = re.search(rb'<</Encoding/([^/]*)/', fdf)
+        codec = se[1].decode() if se else arg[0] if arg else 'latin1'
+        lookup(codec)
+        if not fname.endswith('.fdf'):
+            fname += '.fdf'
 except FileNotFoundError as e:
     print(e)
     sys.exit(1)
-
-if not fdf.startswith(b'%FDF-1.2'):
-    print('Missing FDF signature')
+except AssertionError as e:
+    print(e)
     sys.exit(1)
-
-se = re.search(rb'<</Encoding/([^/]*)/', fdf)
-try:
-    codec = se[1].decode() if se else 'latin1' if not arg[1:] else arg[1]
-    lookup(codec)
 except LookupError as e:
     print(e)
     sys.exit(1)
