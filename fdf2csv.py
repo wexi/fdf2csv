@@ -16,7 +16,7 @@ import csv
 import os
 import re
 import sys
-from codecs import BOM_UTF16_BE
+from codecs import BOM_UTF16_BE, lookup
 from collections import OrderedDict
 
 arg = sys.argv[1:]
@@ -36,14 +36,6 @@ if not arg or arg[0].startswith('-'):
     print("Usage: fdf2csv.py [-dry] [-skip] [-empty] file[.fdf] [codec]")
     sys.exit(1)
 
-
-codec = 'latin1' if not arg[1:] else arg[1]
-try:
-    b'1234'.decode(codec)
-except LookupError as e:
-    print(e)
-    sys.exit(1)
-
 # check if the file exist
 fname = os.path.expanduser(arg[0])
 if fname.endswith('.'):
@@ -60,6 +52,14 @@ except FileNotFoundError as e:
 
 if not fdf.startswith(b'%FDF-1.2'):
     print('Missing FDF signature')
+    sys.exit(1)
+
+se = re.search(rb'<</Encoding/([^/]*)/', fdf)
+try:
+    codec = se[1].decode() if se else 'latin1' if not arg[1:] else arg[1]
+    lookup(codec)
+except LookupError as e:
+    print(e)
     sys.exit(1)
 
 # where magic happens
