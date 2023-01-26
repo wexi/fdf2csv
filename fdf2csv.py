@@ -64,8 +64,8 @@ except LookupError as e:
 pattern = re.compile(rb'<</T\(([^\)]*)\)(/V([^>]*))?>>')
 finds = re.findall(pattern, fdf)
 fdf_list = [(find[0],
-             find[2][1:] if find[2].startswith(b'/') else find[2][1:-1]
-             if find[1] else b'') for find in finds]
+             find[2][1:] if find[2].startswith(b'/') else
+             find[2][1:-1] if find[1] else b'') for find in finds]
 
 
 def oct(mat):
