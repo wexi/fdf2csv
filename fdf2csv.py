@@ -60,9 +60,9 @@ except LookupError as e:
     print(e)
     sys.exit(1)
 
-# where magic happens
 pattern = re.compile(rb'<</T\((.*?)\)(?:(?:/V\((.*?)\))|(?:/V/(.*?)))?>>')
 finds = re.findall(pattern, fdf)
+# /V()>> returns the same checkbox/radio b'' value 
 fdf_list = [(find[0], find[1] if find[1] else find[2]) for find in finds]
 
 
