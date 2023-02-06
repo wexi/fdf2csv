@@ -61,7 +61,7 @@ except LookupError as e:
     sys.exit(1)
 
 # where magic happens
-pattern = re.compile(rb'<</T\((.*?)\)(?:(/V\((.*?)\)>>)|(/V/(.*?)>>)|(?:>>))')
+pattern = re.compile(rb'<</T\((.*?)\)(?:(?:/V\((.*?)\))|(?:/V/(.*?)))?>>')
 finds = re.findall(pattern, fdf)
 fdf_list = [(find[0], find[2] if find[1] else find[4] if find[3] else b'')
             for find in finds]
