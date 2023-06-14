@@ -20,20 +20,24 @@ from codecs import BOM_UTF16_BE, lookup
 from collections import OrderedDict
 
 arg = sys.argv[1:]
-dry = arg and arg[0] == '-dry'
-if dry:                         # only display number of columns
+Dry = arg and arg[0] == '-dry'
+if Dry:                         # only display number of columns
     arg.pop(0)
 
-skip = arg and arg[0] == '-skip'
-if skip:                        # ignore unknown columns
+Tab = arg and arg[0] == '-tab'
+if Tab:                         # excel or excel_tab CSV format
+    arg.pop(0)
+    
+Skip = arg and arg[0] == '-skip'
+if Skip:                        # ignore unknown columns
     arg.pop(0)
 
-empty = arg and arg[0] == '-empty'
-if empty:                       # rewrite csv file
+Empty = arg and arg[0] == '-empty'
+if Empty:                       # rewrite csv file
     arg.pop(0)
 
 if not arg or arg[0].startswith('-'):
-    print("Usage: fdf2csv.py [-dry] [-skip] [-empty] file[.fdf] [codec]")
+    print("Usage: fdf2csv.py [-dry] [-tab] [-skip] [-empty] file[.fdf] [codec]")
     sys.exit(1)
 
 fname = os.path.expanduser(arg[0])
@@ -98,21 +102,24 @@ for token in fdf_list:
     if key.lower() not in ('submit', 'reset'):
         csv_table[key] = utf(token[1])
 
-if dry:
+if Dry:
     print(fname, '#fields:', len(csv_table))
     sys.exit(0)
 
 csv_path = re.sub(r'\d*\.fdf$', '.csv', fname)
 csv_file = os.path.basename(csv_path)
-mode = 'xt' if not os.path.isfile(csv_path) else ('wt' if empty else 'at')
+mode = 'xt' if not os.path.isfile(csv_path) else ('wt' if Empty else 'at')
 
+dialect = None;
 if mode != 'xt':
     with open(csv_path, 'rt') as f:
-        rd = csv.reader(f)
+        dialect = csv.Sniffer().sniff(f.read(1024))
+        f.seek(0)
+        rd = csv.reader(f, dialect)
         keys = next(rd)
         odds = set(csv_table.keys()) - set(keys)
         if odds:
-            if not skip:
+            if not Skip:
                 print(fname, 'Unexpected column name(s):', odds)
                 sys.exit(1)
             for odd in odds:
@@ -121,7 +128,9 @@ if mode != 'xt':
         table.update(csv_table)
 
 with open(csv_path, mode) as f:
-    wr = csv.writer(f)
+    if dialect is None:
+        dialect = csv.excel_tab if Tab else csv.excel
+    wr = csv.writer(f, dialect)
     if mode == 'at':
         wr.writerow(table.values())
         print(fname, 'add to', csv_file)

@@ -14,7 +14,7 @@
 
 * Usage
 
-  ./fdf2csv.py [-dry] [-skip] [-empty] filename[#.fdf] [codec]
+  ./fdf2csv.py [-dry] [-tab] [-skip] [-empty] filename[#.fdf] [codec]
 
   Adds row/data to the output filename.csv if it exists. It is assumed
   that the FDF fields are unique; They would become the CSV column
