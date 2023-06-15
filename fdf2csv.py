@@ -16,6 +16,7 @@ import csv
 import os
 import re
 import sys
+from csv import Dialect
 from codecs import BOM_UTF16_BE, lookup
 from collections import OrderedDict
 
@@ -110,10 +111,16 @@ csv_path = re.sub(r'\d*\.fdf$', '.csv', fname)
 csv_file = os.path.basename(csv_path)
 mode = 'xt' if not os.path.isfile(csv_path) else ('wt' if Empty else 'at')
 
-dialect = None;
+dialect = None
+tab = '\t' if Tab else ','
 if mode != 'xt':
     with open(csv_path, 'rt') as f:
         dialect = csv.Sniffer().sniff(f.read(1024))
+        if dialect.delimiter != tab:
+            print(fname, 'Unexpected CSV delimiter')
+            sys.exit(1)
+        if dialect.escapechar is None:
+            dialect.escapechar = '\\'
         f.seek(0)
         rd = csv.reader(f, dialect)
         keys = next(rd)
@@ -141,5 +148,5 @@ with open(csv_path, mode) as f:
         else:
             wr.writerow(table.keys())
             wr.writerow(table.values())
-        print(fname, 'create, add to', csv_file)
+        print(fname, 'create', csv_file)
 sys.exit(0)
