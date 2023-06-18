@@ -37,8 +37,12 @@ Empty = arg and arg[0] == '-empty'
 if Empty:                       # rewrite csv file
     arg.pop(0)
 
+Quiet = arg and arg[0] == '-quiet'
+if Quiet:
+    arg.pop(0)
+    
 if not arg or arg[0].startswith('-'):
-    print("Usage: fdf2csv.py [-dry] [-tab] [-skip] [-empty] file[.fdf] [codec]")
+    print("Usage: fdf2csv.py [-dry] [-tab] [-skip] [-empty] [-quiet] file[.fdf] [codec]", file=sys.stderr)
     sys.exit(1)
 
 fname = os.path.expanduser(arg[0])
@@ -56,13 +60,13 @@ try:
         if not fname.endswith('.fdf'):
             fname += '.fdf'
 except FileNotFoundError as e:
-    print(e)
+    print(e, file=sys.stderr)
     sys.exit(1)
 except AssertionError as e:
-    print(e)
+    print(e, file=sys.stderr)
     sys.exit(1)
 except LookupError as e:
-    print(e)
+    print(e, file=sys.stderr)
     sys.exit(1)
 
 pattern = re.compile(rb'<<\s*/T\s*\(([^\)]+)\)\s*/V\s*(?:(?:\(([^\)]*)\))|(?:/([^\s>]*)))\s*>>')
@@ -117,7 +121,7 @@ if mode != 'xt':
     with open(csv_path, 'rt') as f:
         dialect = csv.Sniffer().sniff(f.read(1024))
         if dialect.delimiter != tab:
-            print(fname, 'Unexpected CSV delimiter')
+            print(fname, 'Unexpected CSV delimiter', file=sys.stderr)
             sys.exit(1)
         if dialect.escapechar is None:
             dialect.escapechar = '\\'
@@ -127,7 +131,7 @@ if mode != 'xt':
         odds = set(csv_table.keys()) - set(keys)
         if odds:
             if not Skip:
-                print(fname, 'Unexpected column name(s):', odds)
+                print(fname, 'Unexpected column name(s):', odds, file=sys.stderr)
                 sys.exit(1)
             for odd in odds:
                 csv_table.pop(odd)
@@ -140,7 +144,8 @@ with open(csv_path, mode) as f:
     wr = csv.writer(f, dialect)
     if mode == 'at':
         wr.writerow(table.values())
-        print(fname, 'add to', csv_file)
+        if not Quiet:
+            print(fname, 'add to', csv_file)
     else:
         if mode == 'xt':
             wr.writerow(csv_table.keys())
@@ -148,5 +153,6 @@ with open(csv_path, mode) as f:
         else:
             wr.writerow(table.keys())
             wr.writerow(table.values())
-        print(fname, 'create', csv_file)
+        if not Quiet:
+            print(fname, 'create', csv_file)
 sys.exit(0)
