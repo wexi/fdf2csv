@@ -69,7 +69,11 @@ except LookupError as e:
     print(e, file=sys.stderr)
     sys.exit(1)
 
-pattern = re.compile(rb'<<\s*/T\s*\(([^\)]+)\)\s*/V\s*(?:(?:\(([^>]*)\))|(?:/([^\s>]*)))\s*>>')
+pattern = re.compile(rb'<<\s*'
+                     rb'/T\s*\(([^()]+)\)\s*'  # field name
+                     rb'/V\s*(?:(?:\(((?:(?!>>).)*)\))|(?:/(\w+)))\s*'  # value
+                     rb'(?:/\w+\s+\d+\s*)*'  # flags
+                     rb'>>')
 finds = re.findall(pattern, fdf)
 fdf_list = [(find[0], find[1] if find[1] else find[2]) for find in finds]
 
