@@ -54,7 +54,7 @@ try:
         fdf = f.read()
         assert fdf.startswith(b'%FDF-1.2')
         arg.pop(0)
-        se = re.search(rb'<</Encoding/([^/]*)/', fdf)
+        se = re.search(rb'/Encoding\s*/([a-zA-Z0-9_-]+)\b', fdf)
         codec = se[1].decode() if se else arg[0] if arg else 'latin1'
         lookup(codec)
         if not fname.endswith('.fdf'):
