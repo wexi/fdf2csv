@@ -71,7 +71,7 @@ except LookupError as e:
 
 pattern = re.compile(rb'<<\s*'
                      rb'/T\s*\(([^()]+)\)\s*'  # field name
-                     rb'/V\s*(?:(?:\(((?:(?!>>).)*)\))|(?:/([\w-]+)))\s*'  # value
+                     rb'/V\s*(?:(?:\[?\(((?:(?!>>).)*)\)\]?)|(?:/([\w-]+)))\s*'  # value
                      rb'(?:/\w+\s+\d+\s*)*'  # flags
                      rb'>>')
 finds = re.findall(pattern, fdf)
