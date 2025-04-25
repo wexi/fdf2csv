@@ -1,6 +1,12 @@
 #!/bin/bash
 # fdftocsv.sh — extract max column CSV from blob*.fdf files
 
+# resolve symlink to get the real script path
+SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+# now get its directory
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+FDF2CSV="$SCRIPT_DIR/fdf2csv.py"
+
 set -euo pipefail      # exit on any error, undefined variable references are errors,
                        # and pipeline failures are caught
 shopt -s nullglob      # allow globs to expand to an empty list if no matches
@@ -20,14 +26,14 @@ for HEAD in "${blobs[@]}"; do
   rm -f blob.csv
 
   # Attempt to build the CSV header from this file, suppressing output
-  if fdf2csv -quiet "$HEAD" >/dev/null 2>&1; then
+  if $FDF2CSV -quiet "$HEAD" >/dev/null 2>&1; then
     # If header creation succeeds, test every other FDF against it
     for NEXT in "${blobs[@]}"; do
       # Skip the file used as the header source
       [[ "$NEXT" == "$HEAD" ]] && continue
 
-      # Run fdf2csv; if it fails, this header is incomplete
-      if ! fdf2csv -quiet "$NEXT" >/dev/null 2>&1; then
+      # Run $FDF2CSV; if it fails, this header is incomplete
+      if ! $FDF2CSV -quiet "$NEXT" >/dev/null 2>&1; then
         # Clean up partial CSV and try next candidate as header
         rm -f blob.csv
         continue 2
